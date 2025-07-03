@@ -19,10 +19,9 @@ class TelaInicial extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Substitua pelo caminho correto do seu logo
                     Image.asset(
                       'assets/ifc_coin_logo.png',
-                      width: 180,
+                      width: 320,
                     ),
                     const SizedBox(height: 16),
                     const Text(

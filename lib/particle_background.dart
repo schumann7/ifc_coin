@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'dart:ui';
 
 class ParticleBackground extends StatefulWidget {
   const ParticleBackground({super.key});
@@ -15,6 +14,8 @@ class _ParticleBackgroundState extends State<ParticleBackground>
   final List<Particle> _particles = [];
   final int numberOfParticles = 50;
   final double maxDistance = 300;
+  Size? screenSize;
+  double? devicePixelRatio;
 
   @override
   void initState() {
@@ -23,37 +24,54 @@ class _ParticleBackgroundState extends State<ParticleBackground>
         AnimationController(vsync: this, duration: const Duration(hours: 1))
           ..addListener(_updateParticles)
           ..forward();
+  }
 
-    final random = Random();
-    for (var i = 0; i < numberOfParticles; i++) {
-      _particles.add(
-        Particle(
-          position: Offset(
-            random.nextDouble() * window.physicalSize.width,
-            random.nextDouble() * window.physicalSize.height,
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Inicializa partículas apenas uma vez, quando o contexto estiver disponível
+    if (_particles.isEmpty) {
+      screenSize = MediaQuery.of(context).size;
+      devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+      final random = Random();
+      for (var i = 0; i < numberOfParticles; i++) {
+        _particles.add(
+          Particle(
+            position: Offset(
+              random.nextDouble() * screenSize!.width * devicePixelRatio!,
+              random.nextDouble() * screenSize!.height * devicePixelRatio!,
+            ),
+            velocity: Offset(
+              random.nextDouble() * 2 - 1,
+              random.nextDouble() * 2 - 1,
+            ),
           ),
-          velocity: Offset(
-            random.nextDouble() * 2 - 1,
-            random.nextDouble() * 2 - 1,
-          ),
-        ),
-      );
+        );
+      }
     }
   }
 
   void _updateParticles() {
     for (var p in _particles) {
-      p.update();
+      p.update(screenSize!, devicePixelRatio!);
     }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    // Garante que screenSize e devicePixelRatio estejam atualizados
+    screenSize = MediaQuery.of(context).size;
+    devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+
     return Container(
-      color: const Color(0xFFEAF2FB), // tom claro azulado/cinza, similar ao da imagem
+      color: const Color(0xFFEAF2FB),
       child: CustomPaint(
-        painter: ParticlePainter(particles: _particles, maxDistance: maxDistance),
+        painter: ParticlePainter(
+          particles: _particles,
+          maxDistance: maxDistance,
+          devicePixelRatio: devicePixelRatio ?? 1.0,
+        ),
         child: Container(),
       ),
     );
@@ -72,14 +90,17 @@ class Particle {
 
   Particle({required this.position, required this.velocity});
 
-  void update() {
+  void update(Size screenSize, double devicePixelRatio) {
     position += velocity;
 
+    final width = screenSize.width * devicePixelRatio;
+    final height = screenSize.height * devicePixelRatio;
+
     // Bounce on edges
-    if (position.dx <= 0 || position.dx >= window.physicalSize.width) {
+    if (position.dx <= 0 || position.dx >= width) {
       velocity = Offset(-velocity.dx, velocity.dy);
     }
-    if (position.dy <= 0 || position.dy >= window.physicalSize.height) {
+    if (position.dy <= 0 || position.dy >= height) {
       velocity = Offset(velocity.dx, -velocity.dy);
     }
   }
@@ -88,28 +109,38 @@ class Particle {
 class ParticlePainter extends CustomPainter {
   final List<Particle> particles;
   final double maxDistance;
+  final double devicePixelRatio;
 
-  ParticlePainter({required this.particles, required this.maxDistance});
+  ParticlePainter({
+    required this.particles,
+    required this.maxDistance,
+    required this.devicePixelRatio,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.indigo;
 
     for (var p in particles) {
-      canvas.drawCircle(p.position / window.devicePixelRatio, 1, paint); // raio menor
+      canvas.drawCircle(p.position / devicePixelRatio, 1, paint);
     }
 
     for (var i = 0; i < particles.length; i++) {
       for (var j = i + 1; j < particles.length; j++) {
         final distance = (particles[i].position - particles[j].position).distance;
         if (distance < maxDistance) {
-          final opacity = (1 - (distance / maxDistance)) * 0.3;
+          final opacity = ((1 - (distance / maxDistance)) * 0.3).clamp(0.0, 1.0);
+          final baseColor = Colors.indigo;
+          final blendedColor = Color.alphaBlend(
+            baseColor.withAlpha((opacity * 255).toInt()),
+            Colors.transparent,
+          );
           final linePaint = Paint()
-            ..color = Colors.indigo.withOpacity(opacity)
+            ..color = blendedColor
             ..strokeWidth = 1;
           canvas.drawLine(
-            particles[i].position / window.devicePixelRatio,
-            particles[j].position / window.devicePixelRatio,
+            particles[i].position / devicePixelRatio,
+            particles[j].position / devicePixelRatio,
             linePaint,
           );
         }
