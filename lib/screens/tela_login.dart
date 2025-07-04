@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../particle_background.dart';
+import 'primeira_tela.dart';
+import 'home.dart';
 
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
@@ -90,8 +92,11 @@ class _TelaLoginState extends State<TelaLogin> {
                               borderRadius: BorderRadius.circular(24),
                             ),
                           ),
-                          onPressed: () {
-                            // ação de login
+                            onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => HomeScreen()),
+                            );
                           },
                           child: const Text(
                             'Entrar',
@@ -109,7 +114,10 @@ class _TelaLoginState extends State<TelaLogin> {
                           ),
                           TextButton(
                             onPressed: () {
-                              // ação de cadastro
+                              Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TelaInicial()),
+                              );
                             },
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.lightBlue,

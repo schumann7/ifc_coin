@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/primeira_tela.dart';
+import 'screens/tela_login.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE5E5E5)),
       ),
-      home: const TelaInicial(),
+      home: const TelaLogin(),
       debugShowCheckedModeBanner: false,
     );
   }

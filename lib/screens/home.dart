@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'como_ganhar.dart';
+import 'faq.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -126,7 +127,14 @@ class HomeScreen extends StatelessWidget {
                   iconColor: Color(0xFFFFA000),
                   title: 'FAQ',
                   textColor: Color(0xFFFFA000),
-                  onTap: () {},
+                  onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                    builder: (context) => const FAQScreen(),
+                    ),
+                  );
+                  },
                 ),
               ],
             ),

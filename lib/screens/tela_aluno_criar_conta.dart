@@ -14,7 +14,8 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   final TextEditingController _senhaController = TextEditingController();
-  final TextEditingController _confirmarSenhaController = TextEditingController();
+  final TextEditingController _confirmarSenhaController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -36,6 +37,7 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFEFF6FE), // Exemplo de azul claro
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -133,7 +135,8 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
                               });
                             },
                           ),
@@ -174,8 +177,10 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
                           TextButton(
                             onPressed: () {
                               Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => const TelaLogin()),
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const TelaLogin(),
+                                ),
                               );
                             },
                             style: TextButton.styleFrom(
