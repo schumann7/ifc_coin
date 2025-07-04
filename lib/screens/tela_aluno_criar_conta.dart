@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Adicione esta linha
 import '../particle_background.dart';
 import 'tela_login.dart';
 
@@ -14,30 +15,68 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   final TextEditingController _senhaController = TextEditingController();
-  final TextEditingController _confirmarSenhaController =
-      TextEditingController();
+  final TextEditingController _confirmarSenhaController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  String? _senhaError;
+  String? _confirmarSenhaError;
+  String? _emailError;
+
+  @override
+  void initState() {
+    super.initState();
+    _senhaController.addListener(_validarSenhaEmTempoReal);
+    _confirmarSenhaController.addListener(_validarConfirmacaoSenhaEmTempoReal);
+    _emailController.addListener(_validarEmailEmTempoReal);
+  }
 
   @override
   void dispose() {
     _senhaController.dispose();
     _confirmarSenhaController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
-  String? _validarConfirmacaoSenha(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Confirme sua senha';
-    }
-    if (value != _senhaController.text) {
-      return 'As senhas não coincidem';
-    }
-    return null;
+  void _validarSenhaEmTempoReal() {
+    setState(() {
+      final senha = _senhaController.text;
+      if (senha.length < 6) {
+        _senhaError = 'A senha deve ter pelo menos 6 caracteres';
+      } else {
+        _senhaError = null;
+      }
+      // Atualiza confirmação também
+      _validarConfirmacaoSenhaEmTempoReal();
+    });
+  }
+
+  void _validarConfirmacaoSenhaEmTempoReal() {
+    setState(() {
+      if (_confirmarSenhaController.text != _senhaController.text) {
+        _confirmarSenhaError = 'As senhas não coincidem';
+      } else {
+        _confirmarSenhaError = null;
+      }
+    });
+  }
+
+  void _validarEmailEmTempoReal() {
+    setState(() {
+      final email = _emailController.text;
+      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if (email.isNotEmpty && !emailRegex.hasMatch(email)) {
+        _emailError = 'Digite um email válido';
+      } else {
+        _emailError = null;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEFF6FE), // Exemplo de azul claro
+      backgroundColor: const Color(0xFFEFF6FE),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -90,14 +129,20 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
                           labelText: 'Matrícula',
                           border: OutlineInputBorder(),
                         ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
-                        decoration: const InputDecoration(
+                        controller: _emailController,
+                        decoration: InputDecoration(
                           labelText: 'Email',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
+                          errorText: _emailError,
                         ),
                         keyboardType: TextInputType.emailAddress,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (_) => _emailError,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -106,6 +151,7 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
                         decoration: InputDecoration(
                           labelText: 'Senha',
                           border: const OutlineInputBorder(),
+                          errorText: _senhaError,
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -119,6 +165,8 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
                             },
                           ),
                         ),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (_) => _senhaError,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -127,6 +175,7 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
                         decoration: InputDecoration(
                           labelText: 'Confirmar Senha',
                           border: const OutlineInputBorder(),
+                          errorText: _confirmarSenhaError,
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureConfirmPassword
@@ -141,7 +190,8 @@ class _TelaAlunoCriarContaState extends State<TelaAlunoCriarConta> {
                             },
                           ),
                         ),
-                        validator: _validarConfirmacaoSenha,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (_) => _confirmarSenhaError,
                       ),
                       const SizedBox(height: 24),
                       SizedBox(

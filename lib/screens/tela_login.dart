@@ -31,10 +31,11 @@ class _TelaLoginState extends State<TelaLogin> {
                     children: [
                       Image.asset(
                         'assets/ifc_coin_logo.png',
-                        width: 180,
+                        width: 320,
                       ),
                       const SizedBox(height: 32),
                       TextFormField(
+                        keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
                           labelText: 'SIAPE/Matrícula',
                           border: OutlineInputBorder(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'como_ganhar.dart';
 import 'faq.dart';
+import 'tela_login.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -12,7 +13,15 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const Icon(Icons.home, color: Colors.black),
+        leading: IconButton(
+          icon: const Icon(Icons.home, color: Colors.black),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TelaLogin()),
+            );
+          },
+        ),
         title: const Text(
           'Início',
           style: TextStyle(
@@ -82,7 +91,7 @@ class HomeScreen extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 40),
               child: Image.asset(
                 'assets/ifc_coin_logo.png',
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
               ),
             ),
 
