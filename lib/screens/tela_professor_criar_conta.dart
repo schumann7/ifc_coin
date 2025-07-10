@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Adicione esta linha
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../particle_background.dart';
+import '../providers/auth_provider.dart';
 import 'tela_login.dart';
+import 'home.dart';
 
 class TelaProfessorCriarConta extends StatefulWidget {
   const TelaProfessorCriarConta({super.key});
@@ -15,6 +18,8 @@ class _TelaProfessorCriarContaState extends State<TelaProfessorCriarConta> {
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  final TextEditingController _nomeController = TextEditingController();
+  final TextEditingController _matriculaController = TextEditingController();
   final TextEditingController _senhaController = TextEditingController();
   final TextEditingController _confirmarSenhaController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -33,6 +38,8 @@ class _TelaProfessorCriarContaState extends State<TelaProfessorCriarConta> {
 
   @override
   void dispose() {
+    _nomeController.dispose();
+    _matriculaController.dispose();
     _senhaController.dispose();
     _confirmarSenhaController.dispose();
     _emailController.dispose();
@@ -118,19 +125,33 @@ class _TelaProfessorCriarContaState extends State<TelaProfessorCriarConta> {
                       ),
                       const SizedBox(height: 24),
                       TextFormField(
+                        controller: _nomeController,
                         decoration: const InputDecoration(
-                          labelText: 'Nome de usuário',
+                          labelText: 'Nome completo',
                           border: OutlineInputBorder(),
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nome é obrigatório';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
+                        controller: _matriculaController,
                         decoration: const InputDecoration(
                           labelText: 'SIAPE',
                           border: OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'SIAPE é obrigatório';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -194,27 +215,83 @@ class _TelaProfessorCriarContaState extends State<TelaProfessorCriarConta> {
                         validator: (_) => _confirmarSenhaError,
                       ),
                       const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightBlue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                          ),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              // ação de cadastro
-                            }
-                          },
-                          child: const Text(
-                            'Cadastrar',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                        ),
+                      Consumer<AuthProvider>(
+                        builder: (context, authProvider, child) {
+                          return Column(
+                            children: [
+                              if (authProvider.error != null)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.red.shade200),
+                                  ),
+                                  child: Text(
+                                    authProvider.error!,
+                                    style: TextStyle(
+                                      color: Colors.red.shade700,
+                                      fontSize: 14,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                                            SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.lightBlue,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                  onPressed: authProvider.isLoading
+                                      ? null
+                                      : () async {
+                                          if (_formKey.currentState!.validate()) {
+                                            final success = await context.read<AuthProvider>().registrar(
+                                              nome: _nomeController.text.trim(),
+                                              email: _emailController.text.trim(),
+                                              senha: _senhaController.text,
+                                              matricula: _matriculaController.text.trim(),
+                                              role: 'professor',
+                                              turmas: [],
+                                            );
+                                            
+                                            if (success && mounted) {
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => HomeScreen(),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+                                  child: authProvider.isLoading
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                          ),
+                                        )
+                                      : const Text(
+                                          'Cadastrar',
+                                          style: TextStyle(fontSize: 18),
+                                        ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 16),
                       Row(
