@@ -10,9 +10,6 @@ const userRoutes = require('./routes/user');
 
 // Importar modelos da pasta models na raiz
 const User = require('./models/userModel');
-const Transaction = require('./models/transactionModel');
-const Goal = require('./models/goalModel');
-const Achievement = require('./models/achievementModel');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -56,9 +53,6 @@ console.log('Depois do mongoose.connect');
 //rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api/transaction', require('./routes/transaction'));
-app.use('/api/goal', require('./routes/goal'));
-app.use('/api/achievement', require('./routes/achievement'));
 
 //rota de teste
 app.get('/api/health', (req, res) => {
