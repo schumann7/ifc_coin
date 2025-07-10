@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ifc_coin/screens/metas.dart';
 import 'como_ganhar.dart';
 import 'faq.dart';
 import 'tela_login.dart';
@@ -129,7 +130,14 @@ class HomeScreen extends StatelessWidget {
                   iconColor: Color(0xFF1976D2),
                   title: 'Metas',
                   textColor: Color(0xFF1976D2),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                    builder: (context) => const taskScreen(),
+                    ),
+                    );
+                  },
                 ),
                 _HomeCard(
                   icon: Icons.question_answer,
